@@ -17,27 +17,51 @@ const TalkheeselyForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.contact) {
-      toast({
-        title: "خطأ في البيانات",
-        description: "يرجى ملء جميع الحقول المطلوبة",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // هنا يمكن إضافة منطق إرسال البيانات
-    console.log("Form data:", formData);
-    
+  if (!formData.name || !formData.contact) {
+    toast({
+      title: "خطأ في البيانات",
+      description: "يرجى ملء جميع الحقول المطلوبة",
+      variant: "destructive",
+    });
+    return;
+  }
+
+  try {
+    const res = await fetch("https://connect.mailerlite.com/api/subscribers", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-MailerLite-ApiKey": import.meta.env.VITE_MAILERLITE_TOKEN
+      },
+      body: JSON.stringify({
+        email: formData.contactType === "email" ? formData.contact : undefined,
+        fields: {
+          name: formData.name,
+          contact_type: formData.contactType,
+        },
+        groups: [import.meta.env.VITE_MAILERLITE_GROUP]
+      })
+    });
+
+    if (!res.ok) throw new Error("فشل إرسال البيانات");
+
     setIsSubmitted(true);
     toast({
       title: "تم التسجيل بنجاح! 🎉",
       description: "سنتواصل معك قريباً لإرسال رابط النسخة التجريبية",
     });
-  };
+  } catch (error) {
+    console.error(error);
+    toast({
+      title: "حدث خطأ",
+      description: "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً",
+      variant: "destructive",
+    });
+  }
+};
 
   const handleInputChange = (field: string, value: string) => {
     console.log(`Form field changed: ${field} = ${value}`);
