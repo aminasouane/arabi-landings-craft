@@ -17,7 +17,7 @@ const TalkheeselyForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   if (!formData.name || !formData.contact) {
@@ -34,7 +34,7 @@ const TalkheeselyForm = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-MailerLite-ApiKey": import.meta.env.VITE_MAILERLITE_TOKEN
+        "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`, // ✅ تصحيح الهيدر
       },
       body: JSON.stringify({
         email: formData.contactType === "email" ? formData.contact : undefined,
@@ -42,11 +42,15 @@ const TalkheeselyForm = () => {
           name: formData.name,
           contact_type: formData.contactType,
         },
-        groups: [import.meta.env.VITE_MAILERLITE_GROUP]
-      })
+        groups: [import.meta.env.VITE_MAILERLITE_GROUP_ID], // ✅ التصحيح
+      }),
     });
 
-    if (!res.ok) throw new Error("فشل إرسال البيانات");
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("API Error:", errorText);
+      throw new Error("فشل إرسال البيانات");
+    }
 
     setIsSubmitted(true);
     toast({
