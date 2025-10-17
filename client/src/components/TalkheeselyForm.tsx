@@ -17,54 +17,82 @@ const TalkheeselyForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  if (!formData.name || !formData.contact) {
-    toast({
-      title: "خطأ في البيانات",
-      description: "يرجى ملء جميع الحقول المطلوبة",
-      variant: "destructive",
-    });
-    return;
-  }
-
-  try {
-    const res = await fetch("https://connect.mailerlite.com/api/subscribers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`, // ✅ تصحيح الهيدر
-      },
-      body: JSON.stringify({
-        email: formData.contactType === "email" ? formData.contact : undefined,
-        fields: {
-          name: formData.name,
-          contact_type: formData.contactType,
-        },
-        groups: [import.meta.env.VITE_MAILERLITE_GROUP_ID], // ✅ التصحيح
-      }),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("API Error:", errorText);
-      throw new Error("فشل إرسال البيانات");
+    if (!formData.name || !formData.contact) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى ملء جميع الحقول المطلوبة",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsSubmitted(true);
-    toast({
-      title: "تم التسجيل بنجاح! 🎉",
-      description: "سنتواصل معك قريباً لإرسال رابط النسخة التجريبية",
-    });
-  } catch (error) {
-    console.error(error);
-    toast({
-      title: "حدث خطأ",
-      description: "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً",
-      variant: "destructive",
-    });
-  }
+    // فحص ما إذا كان الإيميل مسجل مسبقاً
+    if (formData.contactType === "email") {
+      try {
+        const checkRes = await fetch(`https://connect.mailerlite.com/api/subscribers?email=${encodeURIComponent(formData.contact)}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
+          },
+        });
+
+        if (checkRes.ok) {
+          const data = await checkRes.json();
+          if (data.data && data.data.length > 0) {
+            toast({
+              title: "الإيميل مسجل مسبقاً",
+              description: "هذا الإيميل مسجل بالفعل في قائمتنا. سنتواصل معك قريباً!",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking existing email:", error);
+        // نستمر في التسجيل حتى لو فشل الفحص
+      }
+    }
+
+    try {
+      const res = await fetch("https://connect.mailerlite.com/api/subscribers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          email: formData.contactType === "email" ? formData.contact : undefined,
+          fields: {
+            name: formData.name,
+            contact_type: formData.contactType,
+          },
+          groups: [import.meta.env.VITE_MAILERLITE_GROUP_ID],
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("API Error:", errorText);
+        throw new Error("فشل إرسال البيانات");
+      }
+
+      setIsSubmitted(true);
+      toast({
+        title: "تم التسجيل بنجاح! 🎉",
+        description: "سنتواصل معك قريباً لإرسال رابط النسخة التجريبية",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "حدث خطأ",
+        description: "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً",
+        variant: "destructive",
+      });
+    }
+  };
 };
 
   const handleInputChange = (field: string, value: string) => {
