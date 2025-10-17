@@ -19,11 +19,11 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // عدّاد زمني للإطلاق في 30 أكتوبر 2025
+  // عدّاد زمني للإطلاق في 30 نوفمبر 2025
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
 
   function calculateTimeLeft() {
-    const launchDate = new Date('2025-10-30T00:00:00');
+    const launchDate = new Date('2025-11-30T00:00:00');
     const now = new Date().getTime();
     const difference = launchDate.getTime() - now;
     
