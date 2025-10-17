@@ -79,7 +79,7 @@ const TalkheeselyFooter = () => {
         {/* التذييل السفلي */}
         <div className="py-6 flex flex-col md:flex-row justify-between items-center gap-4 text-background/70 text-sm">
           <div className="flex items-center gap-2">
-            <span>© 2024 تلخيصلي • جميع الحقوق محفوظة</span>
+            <span>© 2025 تلخيصلي • جميع الحقوق محفوظة</span>
           </div>
           
           <div className="flex items-center gap-2">
