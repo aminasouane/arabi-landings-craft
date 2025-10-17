@@ -102,20 +102,72 @@ const TalkheeselyForm = () => {
 
   if (isSubmitted) {
     return (
-      <section className="py-16 bg-muted/50">
+      <section className="py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5 min-h-screen flex items-center justify-center">
         <div className="container mx-auto px-6">
-          <Card className="max-w-md mx-auto text-center shadow-sm">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-primary" />
+          <Card className="max-w-lg mx-auto text-center shadow-xl border-0 bg-card/80 backdrop-blur-sm relative overflow-hidden">
+            {/* خلفية مزخرفة متحركة */}
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 animate-pulse"></div>
+            <div className="absolute top-4 right-4 text-2xl animate-bounce delay-300">🎉</div>
+            <div className="absolute top-4 left-4 text-2xl animate-bounce delay-500">✨</div>
+            <div className="absolute bottom-4 right-4 text-xl animate-bounce delay-700">🌟</div>
+            <div className="absolute bottom-4 left-4 text-xl animate-bounce delay-1000">💫</div>
+
+            <CardContent className="p-10 relative z-10">
+              {/* أيقونة النجاح الكبيرة مع مؤثرات */}
+              <div className="relative mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
+                  <CheckCircle className="w-12 h-12 text-white drop-shadow-md" />
+                </div>
+                {/* حلقات متداخلة متحركة */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-primary/30 rounded-full animate-ping"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 border border-accent/20 rounded-full animate-ping delay-300"></div>
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-2">شكراً لك!</h3>
-              <p className="text-muted-foreground mb-6">
-                تم تسجيلك بنجاح. سنتواصل معك خلال 24 ساعة لإرسال رابط النسخة التجريبية.
-              </p>
-              <div className="bg-primary/10 rounded-2xl p-4">
-                <p className="text-primary font-medium text-sm">
-                  💡 نصيحة: تأكد من فتح البريد الإلكتروني أو واتساب لاستلام الرابط
+
+              {/* العنوان الرئيسي مع تدرج ألوان */}
+              <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent mb-4 animate-fade-in">
+                🎊 مرحباً بك في عائلة تلخيصلي! 🎊
+              </h3>
+
+              {/* رسالة الترحيب الرئيسية */}
+              <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-6 mb-6 border border-primary/10">
+                <p className="text-lg text-foreground mb-3 leading-relaxed">
+                  <span className="font-semibold text-primary">شكراً لك</span> على انضمامك إلينا في هذه الرحلة التعليمية المثيرة!
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  نحن متحمسون جداً لوجودك معنا ونتطلع لمساعدتك في رحلتك التعليمية مع تلخيصلي 📚✨
+                </p>
+              </div>
+
+              {/* معلومات التسليم */}
+              <div className="bg-card/50 rounded-xl p-4 mb-6 border border-primary/20">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-primary">سيتم إرسال الرابط خلال 24 ساعة</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  سنتواصل معك عبر البريد الإلكتروني أو واتساب لإرسال رابط النسخة التجريبية المجانية
+                </p>
+              </div>
+
+              {/* نصيحة مفيدة */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-3">
+                  <div className="text-blue-500 mt-0.5">💡</div>
+                  <div className="text-right">
+                    <p className="text-blue-700 dark:text-blue-300 font-medium text-sm mb-1">
+                      نصيحة مهمة
+                    </p>
+                    <p className="text-blue-600 dark:text-blue-400 text-sm">
+                      تأكد من فتح البريد الإلكتروني أو تطبيق واتساب لاستلام الرابط بسرعة
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* زر إضافي للمشاركة أو العودة */}
+              <div className="mt-6 pt-4 border-t border-border/50">
+                <p className="text-xs text-muted-foreground">
+                  شارك الخبر السار مع أصدقائك أيضاً! 🌟
                 </p>
               </div>
             </CardContent>
