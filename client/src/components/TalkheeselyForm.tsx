@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Mail, User, Phone, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +18,7 @@ const TalkheeselyForm = () => {
     name: "",
     contact: "",
     contactType: "email",
-    interested: "yes"
+    interested: "yes",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { toast } = useToast();
@@ -32,19 +38,25 @@ const TalkheeselyForm = () => {
     // فحص ما إذا كان الإيميل مسجل مسبقاً
     if (formData.contactType === "email") {
       try {
-        const checkRes = await fetch(`https://connect.mailerlite.com/api/subscribers?email=${encodeURIComponent(formData.contact)}`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
-          },
-        });
+        const checkRes = await fetch(
+          `https://connect.mailerlite.com/api/subscribers?email=${encodeURIComponent(
+            formData.contact
+          )}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
+            },
+          }
+        );
 
         if (checkRes.ok) {
           const data = await checkRes.json();
           if (data.data && data.data.length > 0) {
             toast({
               title: "الإيميل مسجل مسبقاً",
-              description: "هذا الإيميل مسجل بالفعل في قائمتنا. سنتواصل معك قريباً!",
+              description:
+                "هذا الإيميل مسجل بالفعل في قائمتنا. سنتواصل معك قريباً!",
               variant: "destructive",
             });
             return;
@@ -56,35 +68,23 @@ const TalkheeselyForm = () => {
       }
     }
 
+    // إرسال البيانات إلى MailerLite
     try {
       const res = await fetch("https://connect.mailerlite.com/api/subscribers", {
-         // فحص ما إذا كان الإيميل مسجل مسبقاً
-    if (formData.contactType === "email") {
-      try {
-        // استخدم endpoint مختلف للبحث عن المشتركين
-        const searchRes = await fetch(`https://connect.mailerlite.com/api/subscribers?filter[email]=${encodeURIComponent(formData.contact)}`, {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          email:
+            formData.contactType === "email" ? formData.contact : undefined,
+          fields: {
+            name: formData.name,
+            contact_type: formData.contactType,
           },
-        });
-
-        if (searchRes.ok) {
-          const searchData = await searchRes.json();
-          if (searchData.data && searchData.data.length > 0) {
-            toast({
-              title: "الإيميل مسجل مسبقاً",
-              description: "هذا الإيميل مسجل بالفعل في قائمتنا. سنتواصل معك قريباً!",
-              variant: "destructive",
-            });
-            return;
-          }
-        }
-      } catch (error) {
-        console.error("Error checking existing email:", error);
-        // نستمر في التسجيل حتى لو فشل الفحص
-      }
-    }
+          groups: [import.meta.env.VITE_MAILERLITE_GROUP_ID],
+        }),
       });
 
       if (!res.ok) {
@@ -109,8 +109,7 @@ const TalkheeselyForm = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    console.log(`Form field changed: ${field} = ${value}`);
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   if (isSubmitted) {
@@ -217,7 +216,6 @@ const TalkheeselyForm = () => {
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     className="text-right"
                     required
-                    data-testid="input-name"
                   />
                 </div>
 
@@ -229,14 +227,14 @@ const TalkheeselyForm = () => {
                     className="flex gap-6"
                   >
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="email" id="email" data-testid="radio-contact-email" />
+                      <RadioGroupItem value="email" id="email" />
                       <Label htmlFor="email" className="flex items-center gap-2 cursor-pointer">
                         <Mail className="w-4 h-4 text-primary" />
                         البريد الإلكتروني
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="whatsapp" id="whatsapp" data-testid="radio-contact-whatsapp" />
+                      <RadioGroupItem value="whatsapp" id="whatsapp" />
                       <Label htmlFor="whatsapp" className="flex items-center gap-2 cursor-pointer">
                         <Phone className="w-4 h-4 text-primary" />
                         واتساب
@@ -247,17 +245,22 @@ const TalkheeselyForm = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="contact" className="text-right">
-                    {formData.contactType === "email" ? "البريد الإلكتروني" : "رقم واتساب"}
+                    {formData.contactType === "email"
+                      ? "البريد الإلكتروني"
+                      : "رقم واتساب"}
                   </Label>
                   <Input
                     id="contact"
                     type={formData.contactType === "email" ? "email" : "tel"}
-                    placeholder={formData.contactType === "email" ? "example@email.com" : "+966 50 123 4567"}
+                    placeholder={
+                      formData.contactType === "email"
+                        ? "example@email.com"
+                        : "+966 50 123 4567"
+                    }
                     value={formData.contact}
                     onChange={(e) => handleInputChange("contact", e.target.value)}
                     className="text-right"
                     required
-                    data-testid="input-contact-form"
                   />
                 </div>
 
@@ -269,20 +272,23 @@ const TalkheeselyForm = () => {
                     className="flex gap-6"
                   >
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="yes" id="yes" data-testid="radio-interested-yes" />
-                      <Label htmlFor="yes" className="cursor-pointer">نعم، متحمس للتجربة! 🚀</Label>
+                      <RadioGroupItem value="yes" id="yes" />
+                      <Label htmlFor="yes" className="cursor-pointer">
+                        نعم، متحمس للتجربة! 🚀
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-2 space-x-reverse">
-                      <RadioGroupItem value="maybe" id="maybe" data-testid="radio-interested-maybe" />
-                      <Label htmlFor="maybe" className="cursor-pointer">ربما لاحقاً</Label>
+                      <RadioGroupItem value="maybe" id="maybe" />
+                      <Label htmlFor="maybe" className="cursor-pointer">
+                        ربما لاحقاً
+                      </Label>
                     </div>
                   </RadioGroup>
                 </div>
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full py-3 font-semibold text-lg hover-elevate active-elevate-2"
-                  data-testid="button-register-trial"
                 >
                   <span>سجل في النسخة التجريبية</span>
                   <ArrowLeft className="mr-3 h-5 w-5" />
