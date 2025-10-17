@@ -93,7 +93,6 @@ const TalkheeselyForm = () => {
       });
     }
   };
-};
 
   const handleInputChange = (field: string, value: string) => {
     console.log(`Form field changed: ${field} = ${value}`);
@@ -105,7 +104,6 @@ const TalkheeselyForm = () => {
       <section className="py-16 bg-gradient-to-br from-primary/5 via-background to-accent/5 min-h-screen flex items-center justify-center">
         <div className="container mx-auto px-6">
           <Card className="max-w-lg mx-auto text-center shadow-xl border-0 bg-card/80 backdrop-blur-sm relative overflow-hidden">
-            {/* خلفية مزخرفة متحركة */}
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 animate-pulse"></div>
             <div className="absolute top-4 right-4 text-2xl animate-bounce delay-300">🎉</div>
             <div className="absolute top-4 left-4 text-2xl animate-bounce delay-500">✨</div>
@@ -113,22 +111,18 @@ const TalkheeselyForm = () => {
             <div className="absolute bottom-4 left-4 text-xl animate-bounce delay-1000">💫</div>
 
             <CardContent className="p-10 relative z-10">
-              {/* أيقونة النجاح الكبيرة مع مؤثرات */}
               <div className="relative mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-pulse">
                   <CheckCircle className="w-12 h-12 text-white drop-shadow-md" />
                 </div>
-                {/* حلقات متداخلة متحركة */}
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 border-2 border-primary/30 rounded-full animate-ping"></div>
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 border border-accent/20 rounded-full animate-ping delay-300"></div>
               </div>
 
-              {/* العنوان الرئيسي مع تدرج ألوان */}
               <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent mb-4 animate-fade-in">
                 🎊 مرحباً بك في عائلة تلخيصلي! 🎊
               </h3>
 
-              {/* رسالة الترحيب الرئيسية */}
               <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-6 mb-6 border border-primary/10">
                 <p className="text-lg text-foreground mb-3 leading-relaxed">
                   <span className="font-semibold text-primary">شكراً لك</span> على انضمامك إلينا في هذه الرحلة التعليمية المثيرة!
@@ -138,7 +132,6 @@ const TalkheeselyForm = () => {
                 </p>
               </div>
 
-              {/* معلومات التسليم */}
               <div className="bg-card/50 rounded-xl p-4 mb-6 border border-primary/20">
                 <div className="flex items-center justify-center gap-2 mb-2">
                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
@@ -149,7 +142,6 @@ const TalkheeselyForm = () => {
                 </p>
               </div>
 
-              {/* نصيحة مفيدة */}
               <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-800">
                 <div className="flex items-start gap-3">
                   <div className="text-blue-500 mt-0.5">💡</div>
@@ -164,7 +156,6 @@ const TalkheeselyForm = () => {
                 </div>
               </div>
 
-              {/* زر إضافي للمشاركة أو العودة */}
               <div className="mt-6 pt-4 border-t border-border/50">
                 <p className="text-xs text-muted-foreground">
                   شارك الخبر السار مع أصدقائك أيضاً! 🌟
@@ -181,7 +172,6 @@ const TalkheeselyForm = () => {
     <section className="py-16 bg-muted/50">
       <div className="container mx-auto px-6">
         <div className="max-w-lg mx-auto">
-          {/* عنوان القسم */}
           <div className="text-center mb-8">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
               جرب <span className="text-primary">تلخيصلي</span> مجاناً
@@ -191,7 +181,6 @@ const TalkheeselyForm = () => {
             </p>
           </div>
 
-          {/* النموذج */}
           <Card className="shadow-sm">
             <CardHeader className="text-center pb-4">
               <CardTitle className="text-xl font-bold text-foreground">تسجيل النسخة التجريبية</CardTitle>
@@ -202,7 +191,6 @@ const TalkheeselyForm = () => {
             
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* الاسم */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-right flex items-center gap-2">
                     <User className="w-4 h-4 text-primary" />
@@ -219,7 +207,6 @@ const TalkheeselyForm = () => {
                   />
                 </div>
 
-                {/* نوع التواصل */}
                 <div className="space-y-3">
                   <Label className="text-right">طريقة التواصل المفضلة</Label>
                   <RadioGroup
@@ -244,7 +231,6 @@ const TalkheeselyForm = () => {
                   </RadioGroup>
                 </div>
 
-                {/* معلومات التواصل */}
                 <div className="space-y-2">
                   <Label htmlFor="contact" className="text-right">
                     {formData.contactType === "email" ? "البريد الإلكتروني" : "رقم واتساب"}
@@ -252,11 +238,7 @@ const TalkheeselyForm = () => {
                   <Input
                     id="contact"
                     type={formData.contactType === "email" ? "email" : "tel"}
-                    placeholder={
-                      formData.contactType === "email" 
-                        ? "example@email.com" 
-                        : "+966 50 123 4567"
-                    }
+                    placeholder={formData.contactType === "email" ? "example@email.com" : "+966 50 123 4567"}
                     value={formData.contact}
                     onChange={(e) => handleInputChange("contact", e.target.value)}
                     className="text-right"
@@ -265,7 +247,6 @@ const TalkheeselyForm = () => {
                   />
                 </div>
 
-                {/* السؤال */}
                 <div className="space-y-3">
                   <Label className="text-right">هل ترغب بتجربة النسخة التجريبية؟</Label>
                   <RadioGroup
@@ -284,7 +265,6 @@ const TalkheeselyForm = () => {
                   </RadioGroup>
                 </div>
 
-                {/* زر الإرسال */}
                 <Button 
                   type="submit" 
                   className="w-full py-3 font-semibold text-lg hover-elevate active-elevate-2"
@@ -297,7 +277,6 @@ const TalkheeselyForm = () => {
             </CardContent>
           </Card>
 
-          {/* معلومة إضافية */}
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
               🔒 بياناتك محمية ولن نشاركها مع أطراف خارجية
