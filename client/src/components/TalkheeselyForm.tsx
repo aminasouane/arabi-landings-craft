@@ -58,19 +58,33 @@ const TalkheeselyForm = () => {
 
     try {
       const res = await fetch("https://connect.mailerlite.com/api/subscribers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
-        },
-        body: JSON.stringify({
-          email: formData.contactType === "email" ? formData.contact : undefined,
-          fields: {
-            name: formData.name,
-            contact_type: formData.contactType,
+         // فحص ما إذا كان الإيميل مسجل مسبقاً
+    if (formData.contactType === "email") {
+      try {
+        // استخدم endpoint مختلف للبحث عن المشتركين
+        const searchRes = await fetch(`https://connect.mailerlite.com/api/subscribers?filter[email]=${encodeURIComponent(formData.contact)}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${import.meta.env.VITE_MAILERLITE_API_KEY}`,
           },
-          groups: [import.meta.env.VITE_MAILERLITE_GROUP_ID],
-        }),
+        });
+
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          if (searchData.data && searchData.data.length > 0) {
+            toast({
+              title: "الإيميل مسجل مسبقاً",
+              description: "هذا الإيميل مسجل بالفعل في قائمتنا. سنتواصل معك قريباً!",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error checking existing email:", error);
+        // نستمر في التسجيل حتى لو فشل الفحص
+      }
+    }
       });
 
       if (!res.ok) {
