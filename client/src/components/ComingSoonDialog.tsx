@@ -62,7 +62,8 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
     setIsLoading(true);
     
     try {
-      const res = await fetch("http://localhost:3002/api/subscribe", {
+      // Use relative URL for Serverless Function
+      const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
