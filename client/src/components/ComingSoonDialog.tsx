@@ -19,11 +19,11 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // عدّاد زمني للإطلاق في 30 نوفمبر 2025
+  // عدّاد زمني للإطلاق في 30 أكتوبر 2025
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
 
   function calculateTimeLeft() {
-    const launchDate = new Date('2025-11-30T00:00:00');
+    const launchDate = new Date('2025-10-30T00:00:00');
     const now = new Date().getTime();
     const difference = launchDate.getTime() - now;
     
@@ -61,29 +61,55 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
 
     setIsLoading(true);
     
-    // محاكاة إرسال البيانات
-    console.log('Form submitted:', { contactType, contactValue });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsLoading(false);
-    
-    // عرض رسالة النجاح أولاً
-    toast({
-      title: "✅ تم التسجيل بنجاح!",
-      description: "شكراً! سنخبرك فور إطلاق النسخة التجريبية.",
-    });
-    
-    // ثم عرض شاشة النجاح
-    setTimeout(() => {
-      setIsSubmitted(true);
+    try {
+      const res = await fetch("http://localhost:3002/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "مستخدم مهتم", // اسم افتراضي
+          email: contactType === "email" ? contactValue : undefined,
+          phone: contactType === "whatsapp" ? contactValue : undefined,
+          contactType: contactType,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error("API Error:", data);
+        throw new Error(data.message || "فشل إرسال البيانات");
+      }
+
+      setIsLoading(false);
       
-      // إغلاق الـ dialog بعد 3 ثواني إضافية لضمان رؤية الرسالة
+      // عرض رسالة النجاح أولاً
+      toast({
+        title: "✅ تم التسجيل بنجاح!",
+        description: "شكراً! سنخبرك فور إطلاق النسخة التجريبية.",
+      });
+      
+      // ثم عرض شاشة النجاح
       setTimeout(() => {
-        onOpenChange(false);
-        setIsSubmitted(false);
-        setContactValue("");
-      }, 3000);
-    }, 500);
+        setIsSubmitted(true);
+        
+        // إغلاق الـ dialog بعد 3 ثواني إضافية لضمان رؤية الرسالة
+        setTimeout(() => {
+          onOpenChange(false);
+          setIsSubmitted(false);
+          setContactValue("");
+        }, 3000);
+      }, 500);
+    } catch (error) {
+      setIsLoading(false);
+      console.error(error);
+      toast({
+        title: "حدث خطأ",
+        description: error instanceof Error ? error.message : "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isSubmitted) {
