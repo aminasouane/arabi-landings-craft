@@ -263,7 +263,7 @@ const TalkheeselyFormWithDialog = () => {
   }
 
   try {
-    const res = await fetch("http://localhost:3002/api/subscribe", {
+    const res = await fetch("/api/subscribe", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -287,11 +287,22 @@ const TalkheeselyFormWithDialog = () => {
     setShowThankYouDialog(true);
   } catch (error) {
     console.error(error);
-    toast({
-      title: "حدث خطأ",
-      description: error instanceof Error ? error.message : "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً",
-      variant: "destructive",
-    });
+    const errorMessage = error instanceof Error ? error.message : "تعذر إرسال البيانات، حاول مرة أخرى لاحقاً";
+    
+    // Special handling for duplicate email
+    if (errorMessage.includes("مسجل بالفعل")) {
+      toast({
+        title: "البريد الإلكتروني مسجل بالفعل",
+        description: "هذا البريد الإلكتروني موجود بالفعل في قائمة الانتظار",
+        variant: "default",
+      });
+    } else {
+      toast({
+        title: "حدث خطأ",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
   }
 };
 
