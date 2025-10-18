@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { BookOpen, Clock, Users, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import ThankYouDialog from "@/components/ThankYouDialog";
 
 interface ComingSoonDialogProps {
   open: boolean;
@@ -17,6 +18,7 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   const [contactValue, setContactValue] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showThankYouDialog, setShowThankYouDialog] = useState(false);
   const { toast } = useToast();
 
   // عدّاد زمني للإطلاق في 30 أكتوبر 2025
@@ -85,23 +87,9 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
 
       setIsLoading(false);
       
-      // عرض رسالة النجاح أولاً
-      toast({
-        title: "✅ تم التسجيل بنجاح!",
-        description: "شكراً! سنخبرك فور إطلاق النسخة التجريبية.",
-      });
-      
-      // ثم عرض شاشة النجاح
-      setTimeout(() => {
-        setIsSubmitted(true);
-        
-        // إغلاق الـ dialog بعد 3 ثواني إضافية لضمان رؤية الرسالة
-        setTimeout(() => {
-          onOpenChange(false);
-          setIsSubmitted(false);
-          setContactValue("");
-        }, 3000);
-      }, 500);
+      // عرض نافذة الشكر بدلاً من toast
+      setIsSubmitted(true);
+      setShowThankYouDialog(true);
     } catch (error) {
       setIsLoading(false);
       console.error(error);
@@ -111,6 +99,13 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleThankYouClose = () => {
+    setShowThankYouDialog(false);
+    // Reset form after closing dialog
+    setContactValue("");
+    setIsSubmitted(false);
   };
 
   if (isSubmitted) {
@@ -138,117 +133,123 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader className="text-center">
-          <DialogTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-            <span>🚀</span>
-            النسخة التجريبية قادمة قريبًا!
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            نموذج التسجيل للحصول على إشعار عند إطلاق النسخة التجريبية من تطبيق تلخيصلي
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader className="text-center">
+            <DialogTitle className="text-2xl font-bold flex items-center justify-center gap-2">
+              <span>🚀</span>
+              النسخة التجريبية قادمة قريبًا!
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              نموذج التسجيل للحصول على إشعار عند إطلاق النسخة التجريبية من تطبيق تلخيصلي
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* العدّاد الزمني */}
-          <div className="bg-muted rounded-2xl p-6 text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Clock className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">متبقي على الإطلاق</span>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-background rounded-xl p-3">
-                <div className="text-2xl font-bold text-primary" data-testid="dialog-days">{timeLeft.days}</div>
-                <div className="text-xs text-muted-foreground">يوم</div>
+          <div className="space-y-6">
+            {/* العدّاد الزمني */}
+            <div className="bg-muted rounded-2xl p-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Clock className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">متبقي على الإطلاق</span>
               </div>
-              <div className="bg-background rounded-xl p-3">
-                <div className="text-2xl font-bold text-primary" data-testid="dialog-hours">{timeLeft.hours}</div>
-                <div className="text-xs text-muted-foreground">ساعة</div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-background rounded-xl p-3">
+                  <div className="text-2xl font-bold text-primary" data-testid="dialog-days">{timeLeft.days}</div>
+                  <div className="text-xs text-muted-foreground">يوم</div>
+                </div>
+                <div className="bg-background rounded-xl p-3">
+                  <div className="text-2xl font-bold text-primary" data-testid="dialog-hours">{timeLeft.hours}</div>
+                  <div className="text-xs text-muted-foreground">ساعة</div>
+                </div>
+                <div className="bg-background rounded-xl p-3">
+                  <div className="text-2xl font-bold text-primary" data-testid="dialog-minutes">{timeLeft.minutes}</div>
+                  <div className="text-xs text-muted-foreground">دقيقة</div>
+                </div>
               </div>
-              <div className="bg-background rounded-xl p-3">
-                <div className="text-2xl font-bold text-primary" data-testid="dialog-minutes">{timeLeft.minutes}</div>
-                <div className="text-xs text-muted-foreground">دقيقة</div>
+            </div>
+
+            {/* الوصف */}
+            <div className="text-center space-y-2">
+              <p className="text-muted-foreground">
+                نحن نعمل حاليًا على إطلاق تطبيق تلخيصلي.
+              </p>
+              <p className="text-sm text-primary font-medium">
+                سجّل بياناتك لتكون من أوائل من يجرب النسخة التجريبية.
+              </p>
+            </div>
+
+            {/* أيقونة الطالب */}
+            <div className="flex justify-center">
+              <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                <BookOpen className="w-10 h-10 text-primary-foreground" />
               </div>
             </div>
-          </div>
 
-          {/* الوصف */}
-          <div className="text-center space-y-2">
-            <p className="text-muted-foreground">
-              نحن نعمل حاليًا على إطلاق تطبيق تلخيصلي.
-            </p>
-            <p className="text-sm text-primary font-medium">
-              سجّل بياناتك لتكون من أوائل من يجرب النسخة التجريبية.
-            </p>
-          </div>
+            {/* نموذج التسجيل */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">طريقة التواصل المفضلة</Label>
+                <RadioGroup value={contactType} onValueChange={setContactType} className="flex gap-6">
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="email" id="email" data-testid="radio-email" />
+                    <Label htmlFor="email" className="text-sm">البريد الإلكتروني</Label>
+                  </div>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <RadioGroupItem value="whatsapp" id="whatsapp" data-testid="radio-whatsapp" />
+                    <Label htmlFor="whatsapp" className="text-sm">رقم واتساب</Label>
+                  </div>
+                </RadioGroup>
+              </div>
 
-          {/* أيقونة الطالب */}
-          <div className="flex justify-center">
-            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
-              <BookOpen className="w-10 h-10 text-primary-foreground" />
+              <div className="space-y-2">
+                <Label htmlFor="contact" className="text-sm font-medium">
+                  {contactType === "email" ? "البريد الإلكتروني" : "رقم واتساب"}
+                </Label>
+                <Input
+                  id="contact"
+                  type={contactType === "email" ? "email" : "tel"}
+                  placeholder={contactType === "email" ? "example@email.com" : "+966 5X XXX XXXX"}
+                  value={contactValue}
+                  onChange={(e) => setContactValue(e.target.value)}
+                  className="text-right"
+                  dir="ltr"
+                  data-testid="input-contact"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full hover-elevate active-elevate-2"
+                size="lg"
+                disabled={isLoading}
+                data-testid="button-submit"
+              >
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
+                    <span>جارٍ التسجيل...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4" />
+                    <span>سجّل اهتمامك</span>
+                  </div>
+                )}
+              </Button>
+            </form>
+
+            <div className="text-center text-xs text-muted-foreground">
+              سنحافظ على خصوصية بياناتك ولن نرسل إلا التحديثات المهمة
             </div>
           </div>
-
-          {/* نموذج التسجيل */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">طريقة التواصل المفضلة</Label>
-              <RadioGroup value={contactType} onValueChange={setContactType} className="flex gap-6">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="email" id="email" data-testid="radio-email" />
-                  <Label htmlFor="email" className="text-sm">البريد الإلكتروني</Label>
-                </div>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <RadioGroupItem value="whatsapp" id="whatsapp" data-testid="radio-whatsapp" />
-                  <Label htmlFor="whatsapp" className="text-sm">رقم واتساب</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="contact" className="text-sm font-medium">
-                {contactType === "email" ? "البريد الإلكتروني" : "رقم واتساب"}
-              </Label>
-              <Input
-                id="contact"
-                type={contactType === "email" ? "email" : "tel"}
-                placeholder={contactType === "email" ? "example@email.com" : "+966 5X XXX XXXX"}
-                value={contactValue}
-                onChange={(e) => setContactValue(e.target.value)}
-                className="text-right"
-                dir="ltr"
-                data-testid="input-contact"
-              />
-            </div>
-
-            <Button 
-              type="submit" 
-              className="w-full hover-elevate active-elevate-2" 
-              size="lg"
-              disabled={isLoading}
-              data-testid="button-submit"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-                  <span>جارٍ التسجيل...</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Zap className="w-4 h-4" />
-                  <span>سجّل اهتمامك</span>
-                </div>
-              )}
-            </Button>
-          </form>
-
-          <div className="text-center text-xs text-muted-foreground">
-            سنحافظ على خصوصية بياناتك ولن نرسل إلا التحديثات المهمة
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+      <ThankYouDialog
+        open={showThankYouDialog}
+        onOpenChange={handleThankYouClose}
+      />
+    </>
   );
 };
 
