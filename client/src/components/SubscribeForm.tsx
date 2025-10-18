@@ -29,25 +29,26 @@ export default function SubscribeForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch("https://connect.mailerlite.com/api/subscribers", {
+      const response = await fetch("http://localhost:3002/api/subscribe", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_MAILERLITE_TOKEN}`, // ✅ من .env
         },
         body: JSON.stringify({
+          name: "مشترك في النشرة البريدية", // اسم افتراضي
           email: values.email,
-          groups: [import.meta.env.VITE_MAILERLITE_GROUP], // ✅ من .env
+          contactType: "email",
         }),
       })
+
+      const data = await response.json()
 
       if (response.ok) {
         alert("🎉 تم تسجيلك بنجاح!")
         form.reset()
       } else {
-        const errorData = await response.json()
-        console.error("MailerLite error:", errorData)
-        alert("⚠️ حدث خطأ أثناء التسجيل")
+        console.error("API Error:", data)
+        alert(`⚠️ ${data.message || "حدث خطأ أثناء التسجيل"}`)
       }
     } catch (err) {
       console.error(err)
