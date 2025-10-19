@@ -64,6 +64,9 @@ export default async function handler(req: any, res: any) {
       
       const resend = new Resend(process.env.RESEND_API_KEY);
       
+      console.log("Updating contact in Resend:", email);
+      console.log("Using audienceId:", process.env.RESEND_AUDIENCE_ID);
+      
       // Update contact status to subscribed (confirmed)
       const updateOptions: any = {
         audienceId: process.env.RESEND_AUDIENCE_ID,
@@ -74,6 +77,11 @@ export default async function handler(req: any, res: any) {
       const updateResponse = await resend.contacts.update(updateOptions);
       
       console.log("Contact updated in Resend:", updateResponse);
+      
+      if (updateResponse.error) {
+        console.error("Failed to update contact in Resend:", updateResponse.error);
+        throw new Error(`Failed to update contact: ${updateResponse.error.message}`);
+      }
       
       // Also update in MailerLite for backup (but don't rely on it)
       try {
@@ -238,8 +246,170 @@ export default async function handler(req: any, res: any) {
       
       // Return different response based on request method
       if (req.method === 'GET') {
-        // For GET requests (from email link), return JSON with success message
-        res.json({ success: true, message: 'تم تأكيد بريدك الإلكتروني بنجاح' });
+        // For GET requests (from email link), return HTML page
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(`
+          <!DOCTYPE html>
+          <html lang="ar" dir="rtl">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>تم تأكيد بريدك الإلكتروني</title>
+            <style>
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f5f7fa;
+                color: #333;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+              }
+              .container {
+                max-width: 600px;
+                background-color: #ffffff;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-radius: 12px;
+                overflow: hidden;
+                width: 100%;
+                margin: 20px;
+              }
+              .header {
+                background-color: #4F46E5;
+                padding: 30px 20px;
+                text-align: center;
+                color: #ffffff;
+              }
+              .header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+              }
+              .header p {
+                margin: 10px 0 0;
+                font-size: 16px;
+                color: #e0e7ff;
+              }
+              .content {
+                padding: 40px 30px;
+                text-align: center;
+              }
+              .success-icon {
+                width: 80px;
+                height: 80px;
+                background-color: #10b981;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 20px;
+              }
+              .success-icon svg {
+                width: 40px;
+                height: 40px;
+                stroke: white;
+                stroke-width: 2;
+              }
+              .success-message {
+                background-color: #f0fdf4;
+                border: 1px solid #bbf7d0;
+                border-radius: 12px;
+                padding: 25px;
+                margin-bottom: 30px;
+                text-align: center;
+              }
+              .success-message p {
+                margin: 0;
+                color: #166534;
+                font-size: 16px;
+                line-height: 1.5;
+              }
+              .footer {
+                background-color: #f8f9fa;
+                padding: 25px 30px;
+                text-align: center;
+                border-top: 1px solid #e9ecef;
+              }
+              .footer p {
+                margin: 0 0 10px;
+                color: #6c757d;
+                font-size: 14px;
+              }
+              .footer a {
+                color: #4F46E5;
+                text-decoration: none;
+                font-weight: 500;
+              }
+              .footer .links {
+                margin-top: 15px;
+              }
+              .footer .links span {
+                margin: 0 10px;
+                color: #6c757d;
+              }
+              @media (max-width: 768px) {
+                .container {
+                  margin: 10px;
+                  border-radius: 8px;
+                }
+                .header {
+                  padding: 20px 15px;
+                }
+                .header h1 {
+                  font-size: 24px;
+                }
+                .content {
+                  padding: 30px 20px;
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>تلخيصلي</h1>
+                <p>أداة تلخيص المحاضرات الذكية</p>
+              </div>
+              
+              <div class="content">
+                <div class="success-icon">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                
+                <h2 style="color: #333; margin-bottom: 15px; font-size: 24px;">تم تأكيد اشتراكك بنجاح!</h2>
+                
+                <div class="success-message">
+                  <p><strong>🎉 تهانينا!</strong> أنت الآن عضو مؤكد في تلخيصلي. ستكون من أوائل من يحصل على دعوة لتجربة النسخة التجريبية.</p>
+                </div>
+                
+                <div style="background-color: #f8f9ff; border-radius: 12px; padding: 25px; margin-bottom: 30px; text-align: right;">
+                  <h3 style="color: #4F46E5; margin-top: 0; margin-bottom: 20px; font-size: 20px; text-align: center;">ماذا بعد ذلك؟h3>
+                  <ul style="padding-right: 20px; margin: 0; line-height: 1.8;">
+                    <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> إشعار فوري عند إطلاق النسخة التجريبية</li>
+                    <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> دعوة حصرية لتجربة جميع الميزات</li>
+                    <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> نصائح وحيل للاستفادة القصوى من التطبيق</li>
+                    <li style="color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> وصول مبكر للميزات الجديدة</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="footer">
+                <p>هل لديك أي أسئلة؟ <a href="mailto:support@telkhiseli.info">تواصل معنا</a></p>
+                <p>© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
+                <div class="links">
+                  <a href="https://telkhiseli.info">زيارة موقعنا</a>
+                  <span>|</span>
+                  <a href="https://twitter.com/telkhiseli">تابعنا على تويتر</a>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `);
       } else {
         // For POST requests, return JSON with success message
         res.json({ success: true, message: 'تم تأكيد بريدك الإلكتروني بنجاح' });
