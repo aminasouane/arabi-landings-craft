@@ -119,6 +119,7 @@ export default async function handler(req: any, res: any) {
             phone: contactType === "whatsapp" ? phone : undefined,
           },
           groups: [process.env.MAILERLITE_GROUP_ID],
+          status: "active", // هذا يمنع إرسال بريد التأكيد
         }),
       });
 
@@ -136,21 +137,45 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ message: "فشل إرسال البيانات إلى MailerLite" });
       }
       
-      // Register contact in Resend audience and send confirmation email (only for email contacts)
+      // Register contact in Resend and send confirmation email (only for email contacts)
       if (contactType === "email" && email && process.env.RESEND_API_KEY) {
         try {
           const resend = new Resend(process.env.RESEND_API_KEY);
           
-          // First, add contact to Resend audience
-          const audienceResponse = await resend.contacts.create({
-            email: email,
-            firstName: name.split(' ')[0],
-            lastName: name.split(' ').slice(1).join(' '),
-            unsubscribed: false,
-            audienceId: process.env.RESEND_AUDIENCE_ID || 'default'
-          });
+          // First, check if contact already exists in Resend
+          let existingContact = null;
+          if (process.env.RESEND_AUDIENCE_ID) {
+            try {
+              existingContact = await resend.contacts.get({
+                audienceId: process.env.RESEND_AUDIENCE_ID,
+                email: email
+              });
+              console.log("Existing contact found in Resend:", existingContact);
+            } catch (getError) {
+              // Contact doesn't exist, continue with creation
+              console.log("Contact not found in Resend, will create new one");
+            }
+          }
           
-          console.log("Contact added to Resend audience:", audienceResponse);
+          // If contact exists and is already subscribed, return error
+          if (existingContact && existingContact.data && existingContact.data.unsubscribed === false) {
+            return res.status(409).json({
+              message: "هذا البريد الإلكتروني مسجل ومؤكد بالفعل"
+            });
+          }
+          
+          // Create contact in Resend (general contacts, not in specific audience yet)
+          // Using any type to bypass TypeScript issues with Resend API
+          const contactOptions: any = {
+            audienceId: process.env.RESEND_AUDIENCE_ID,
+            email: email,
+            first_name: name.split(' ')[0],
+            last_name: name.split(' ').slice(1).join(' '),
+            unsubscribed: true // Start as unsubscribed until confirmed
+          };
+          
+          const contactResponse = await resend.contacts.create(contactOptions);
+          console.log("Contact created in Resend:", contactResponse);
           
           // Generate confirmation token
           const confirmationToken = Buffer.from(`${email}:${Date.now()}`).toString('base64');
