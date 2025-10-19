@@ -189,6 +189,9 @@ export default async function handler(req: any, res: any) {
           console.log("Sending confirmation email to:", email);
           console.log("Using RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Set" : "Not set");
           
+          // Add a small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
           const { data, error } = await resend.emails.send({
             from: 'تلخيصلي <noreply@telkhiseli.info>',
             to: [email],
@@ -268,6 +271,96 @@ export default async function handler(req: any, res: any) {
           if (error) {
             console.error("Resend Email API Error:", error);
             console.error("Error details:", JSON.stringify(error, null, 2));
+            
+            // If rate limit exceeded, try again after a delay
+            if (error.name === 'rate_limit_exceeded') {
+              console.log("Rate limit exceeded, retrying after 3 seconds...");
+              await new Promise(resolve => setTimeout(resolve, 3000));
+              
+              try {
+                const retryData = await resend.emails.send({
+                  from: 'تلخيصلي <noreply@telkhiseli.info>',
+                  to: [email],
+                  reply_to: 'support@telkhiseli.info',
+                  subject: 'تأكيد اشتراكك في تلخيصلي',
+                  html: `
+                    <!DOCTYPE html>
+                    <html lang="ar" dir="rtl">
+                    <head>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>تأكيد اشتراكك في تلخيصلي</title>
+                    </head>
+                    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f7fa; color: #333;">
+                      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                        <!-- Header -->
+                        <div style="background-color: #4F46E5; padding: 30px 20px; text-align: center;">
+                          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">تلخيصلي</h1>
+                          <p style="color: #e0e7ff; margin: 10px 0 0; font-size: 16px;">أداة تلخيص المحاضرات الذكية</p>
+                        </div>
+                        
+                        <!-- Main Content -->
+                        <div style="padding: 40px 30px;">
+                          <div style="text-align: center; margin-bottom: 30px;">
+                            <h2 style="color: #333; margin-bottom: 15px; font-size: 24px;">شكراً لتسجيلك، ${name.split(' ')[0]}!</h2>
+                            <p style="color: #666; font-size: 16px; line-height: 1.5;">يرجى تأكيد بريدك الإلكتروني لتفعيل اشتراكك والحصول على آخر التحديثات</p>
+                          </div>
+                          
+                          <!-- Confirmation Button -->
+                          <div style="text-align: center; margin: 35px 0;">
+                            <a href="${confirmationUrl}" style="background-color: #4F46E5; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 18px; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+                              تأكيد البريد الإلكتروني
+                            </a>
+                          </div>
+                          
+                          <!-- Alternative Link -->
+                          <div style="text-align: center; margin-bottom: 40px;">
+                            <p style="color: #666; font-size: 14px; margin: 0;">إذا لم يعمل الزر أعلاه، انسخ والصق الرابط التالي في متصفحك:</p>
+                            <p style="color: #4F46E5; font-size: 13px; word-break: break-all; margin: 8px 0 0;">${confirmationUrl}</p>
+                          </div>
+                          
+                          <!-- Features Section -->
+                          <div style="background-color: #f8f9ff; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
+                            <h3 style="color: #4F46E5; margin-top: 0; margin-bottom: 20px; font-size: 20px; text-align: center;">ماذا ستحصل مع تلخيصلي؟h3>
+                            <ul style="padding-right: 20px; margin: 0; line-height: 1.8;">
+                              <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تلخيص المحاضرات الحية في دقائق</li>
+                              <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تنظيم الملاحظات تلقائيًا</li>
+                              <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تجربة مجانية قبل الاشتراك</li>
+                              <li style="color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> دعوة حصرية للنسخة التجريبية الأولى</li>
+                            </ul>
+                          </div>
+                          
+                          <!-- Security Notice -->
+                          <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 30px;">
+                            <p style="margin: 0; color: #92400e; font-size: 14px;">
+                              <strong>ملاحظة أمان:</strong> هذا الرابط صالح لمدة 24 ساعة فقط. إذا لم تطلب هذا البريد، يرجى تجاهله.
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center; border-top: 1px solid #e9ecef;">
+                          <p style="margin: 0 0 10px; color: #6c757d; font-size: 14px;">أنت تتلقى هذا البريد لأنك سجلت في تلخيصلي.</p>
+                          <p style="margin: 0; color: #6c757d; font-size: 14px;">© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
+                          <div style="margin-top: 15px;">
+                            <a href="https://telkhiseli.info" style="color: #4F46E5; text-decoration: none; font-weight: 500;">زيارة موقعنا</a>
+                            <span style="margin: 0 10px; color: #6c757d;">|</span>
+                            <a href="mailto:support@telkhiseli.info" style="color: #4F46E5; text-decoration: none; font-weight: 500;">تواصل معنا</a>
+                          </div>
+                        </div>
+                      </div>
+                    </body>
+                    </html>
+                  `
+                });
+                
+                if (retryData && (retryData as any).id) {
+                  console.log("Confirmation email sent successfully on retry:", (retryData as any).id);
+                }
+              } catch (retryError) {
+                console.error("Retry also failed:", retryError);
+              }
+            }
           } else {
             console.log("Confirmation email sent successfully via Resend:", data);
             if (data && data.id) {
