@@ -6,7 +6,7 @@
     },
     {
       "source": "/confirm-email",
-      "destination": "/client/index.html"
+      "destination": "/api/confirm-email"
     }
   ]
 }
