@@ -1,19 +1,7 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { Request, Response } from 'express';
+import { Resend } from 'resend';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Add CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' });
-  }
+export default async function handler(req: Request, res: Response) {
 
   try {
     const { name, email, phone, contactType } = req.body;
@@ -128,12 +116,77 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         // Check if it's a duplicate subscriber error
         if (errorData.includes("already") || errorData.includes("duplicate") || response.status === 409) {
-          return res.status(409).json({ 
-            message: "هذا البريد الإلكتروني مسجل بالفعل في قائمة الانتظار" 
+          return res.status(409).json({
+            message: "هذا البريد الإلكتروني مسجل بالفعل في قائمة الانتظار"
           });
         }
         
         return res.status(400).json({ message: "فشل إرسال البيانات إلى MailerLite" });
+      }
+      
+      // Register contact in Resend audience and send welcome email (only for email contacts)
+      if (contactType === "email" && email && process.env.RESEND_API_KEY) {
+        try {
+          const resend = new Resend(process.env.RESEND_API_KEY);
+          
+          // First, add contact to Resend audience
+          const audienceResponse = await resend.contacts.create({
+            email: email,
+            firstName: name.split(' ')[0],
+            lastName: name.split(' ').slice(1).join(' '),
+            unsubscribed: false,
+            audienceId: process.env.RESEND_AUDIENCE_ID || 'default'
+          });
+          
+          console.log("Contact added to Resend audience:", audienceResponse);
+          
+          // Then send welcome email
+          const { data, error } = await resend.emails.send({
+            from: 'تلخيصلي <noreply@telkhiseli.info>', // استبدل yourdomain.com بنطاقك
+            to: [email],
+            subject: 'مرحبا بك في مجتمع تلخيصلي',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; direction: rtl; text-align: right;">
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <h1 style="color: #4F46E5; margin-bottom: 10px;">مرحبا بك في مجتمع تلخيصلي</h1>
+                  <p style="font-size: 18px; color: #666;">شكراً لتسجيلك معنا!</p>
+                </div>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                  <h2 style="color: #4F46E5; margin-bottom: 15px;">نحن متحمسون لإطلاق النسخة التجريبية</h2>
+                  <p>تطبيقنا يساعدك على تلخيص المحاضرات الحية بسرعة وذكاء. مع تلخيصلي ستحصل على:</p>
+                  
+                  <ul style="line-height: 1.8; margin-top: 15px; padding-right: 20px;">
+                    <li style="margin-bottom: 8px;">✅ تلخيص دروسك وملاحظاتك في دقائق</li>
+                    <li style="margin-bottom: 8px;">✅ تجربة مجانية لتجربة جميع الميزات قبل الاشتراك</li>
+                    <li style="margin-bottom: 8px;">✅ قريبا ستصلك دعوة خاصة لتجربة النسخة المجانية الأولى</li>
+                  </ul>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 30px;">
+                  <p style="font-size: 16px; margin-bottom: 10px;">تابع بريدك الإلكتروني لتصلك آخر التحديثات حول الإطلاق الرسمي</p>
+                  <div style="background-color: #4F46E5; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block;">
+                    <span>🚀 قريباً!</span>
+                  </div>
+                </div>
+                
+                <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
+                  <p style="font-size: 14px; color: #666;">أنت تتلقى هذا البريد لأنك أظهرت اهتمامك بـ تلخيصلي.</p>
+                  <p style="font-size: 14px; color: #666;">© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
+                </div>
+              </div>
+            `
+          });
+          
+          if (error) {
+            console.error("Resend Email API Error:", error);
+          } else {
+            console.log("Welcome email sent successfully via Resend:", data);
+          }
+        } catch (resendError) {
+          console.error("Failed to register contact or send welcome email via Resend:", resendError);
+          // لا تعيد خطأ، فالتسجيل في MailerLite تم بنجاح
+        }
       }
     } catch (mailerLiteError) {
       console.error("MailerLite API failed:", mailerLiteError);
