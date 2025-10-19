@@ -182,10 +182,13 @@ export default async function handler(req: any, res: any) {
           
           // Generate confirmation token
           const confirmationToken = Buffer.from(`${email}:${Date.now()}`).toString('base64');
-          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://telkhiseli.info';
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.telkhiseli.info';
           const confirmationUrl = `${siteUrl}/confirm-email?token=${confirmationToken}`;
           
           // Send confirmation email
+          console.log("Sending confirmation email to:", email);
+          console.log("Using RESEND_API_KEY:", process.env.RESEND_API_KEY ? "Set" : "Not set");
+          
           const { data, error } = await resend.emails.send({
             from: 'تلخيصلي <noreply@telkhiseli.info>',
             to: [email],
@@ -264,11 +267,16 @@ export default async function handler(req: any, res: any) {
           
           if (error) {
             console.error("Resend Email API Error:", error);
+            console.error("Error details:", JSON.stringify(error, null, 2));
           } else {
             console.log("Confirmation email sent successfully via Resend:", data);
+            if (data && data.id) {
+              console.log("Email ID:", data.id);
+            }
           }
         } catch (resendError) {
           console.error("Failed to register contact or send confirmation email via Resend:", resendError);
+          console.error("Resend error details:", JSON.stringify(resendError, null, 2));
           // لا تعيد خطأ، فالتسجيل في MailerLite تم بنجاح
         }
       }
