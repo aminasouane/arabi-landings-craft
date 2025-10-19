@@ -146,10 +146,13 @@ export default async function handler(req: any, res: any) {
           let existingContact = null;
           if (process.env.RESEND_AUDIENCE_ID) {
             try {
-              existingContact = await resend.contacts.get({
+              // Use any type to bypass TypeScript issues with Resend API
+              const getOptions: any = {
                 audienceId: process.env.RESEND_AUDIENCE_ID,
                 email: email
-              });
+              };
+              
+              existingContact = await resend.contacts.get(getOptions);
               console.log("Existing contact found in Resend:", existingContact);
             } catch (getError) {
               // Contact doesn't exist, continue with creation
