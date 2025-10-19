@@ -11,12 +11,24 @@ export default async function handler(req: any, res: any) {
     return;
   }
 
-  if (req.method !== 'POST') {
+  if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
   try {
-    const { token } = req.body;
+    // Handle both GET (from URL) and POST (from body) requests
+    let token;
+    
+    if (req.method === 'GET') {
+      // Get token from URL query parameters
+      token = req.query.token;
+    } else {
+      // Get token from request body
+      token = req.body.token;
+    }
+    
+    console.log("Confirm email request method:", req.method);
+    console.log("Token received:", token ? "Yes" : "No");
     
     if (!token) {
       return res.status(400).json({ message: 'رمز التأكيد مطلوب' });
@@ -224,7 +236,14 @@ export default async function handler(req: any, res: any) {
         }
       }
       
-      res.json({ success: true, message: 'تم تأكيد بريدك الإلكتروني بنجاح' });
+      // Return different response based on request method
+      if (req.method === 'GET') {
+        // For GET requests (from email link), return JSON with success message
+        res.json({ success: true, message: 'تم تأكيد بريدك الإلكتروني بنجاح' });
+      } else {
+        // For POST requests, return JSON with success message
+        res.json({ success: true, message: 'تم تأكيد بريدك الإلكتروني بنجاح' });
+      }
     } catch (error) {
       console.error("Error confirming email:", error);
       res.status(500).json({ message: 'حدث خطأ أثناء تأكيد البريد الإلكتروني' });
