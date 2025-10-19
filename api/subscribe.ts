@@ -1,7 +1,20 @@
-import { Request, Response } from 'express';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
 
-export default async function handler(req: Request, res: Response) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Add CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
 
   try {
     const { name, email, phone, contactType } = req.body;
@@ -124,7 +137,7 @@ export default async function handler(req: Request, res: Response) {
         return res.status(400).json({ message: "فشل إرسال البيانات إلى MailerLite" });
       }
       
-      // Register contact in Resend audience and send welcome email (only for email contacts)
+      // Register contact in Resend audience and send confirmation email (only for email contacts)
       if (contactType === "email" && email && process.env.RESEND_API_KEY) {
         try {
           const resend = new Resend(process.env.RESEND_API_KEY);
@@ -140,20 +153,39 @@ export default async function handler(req: Request, res: Response) {
           
           console.log("Contact added to Resend audience:", audienceResponse);
           
-          // Then send welcome email
+          // Generate confirmation token
+          const confirmationToken = Buffer.from(`${email}:${Date.now()}`).toString('base64');
+          const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://telkhiseli.info';
+          const confirmationUrl = `${siteUrl}/confirm-email?token=${confirmationToken}`;
+          
+          // Send confirmation email
           const { data, error } = await resend.emails.send({
-            from: 'تلخيصلي <noreply@telkhiseli.info>', // استبدل yourdomain.com بنطاقك
+            from: 'تلخيصلي <noreply@telkhiseli.info>',
             to: [email],
-            subject: 'مرحبا بك في مجتمع تلخيصلي',
+            subject: 'يرجى تأكيد بريدك الإلكتروني - تلخيصلي',
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; direction: rtl; text-align: right;">
                 <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="color: #4F46E5; margin-bottom: 10px;">مرحبا بك في مجتمع تلخيصلي</h1>
-                  <p style="font-size: 18px; color: #666;">شكراً لتسجيلك معنا!</p>
+                  <h1 style="color: #4F46E5; margin-bottom: 10px;">شكراً لتسجيلك في تلخيصلي!</h1>
+                  <p style="font-size: 18px; color: #666;">يرجى تأكيد بريدك الإلكتروني لإكمال التسجيل</p>
                 </div>
                 
                 <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                  <h2 style="color: #4F46E5; margin-bottom: 15px;">نحن متحمسون لإطلاق النسخة التجريبية</h2>
+                  <h2 style="color: #4F46E5; margin-bottom: 15px;">مرحباً ${name}!</h2>
+                  <p>شكراً لك على اهتمامك بتطبيق تلخيصلي. لتأكيد تسجيلك، يرجى النقر على الزر أدناه:</p>
+                  
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${confirmationUrl}" style="background-color: #4F46E5; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                      تأكيد البريد الإلكتروني
+                    </a>
+                  </div>
+                  
+                  <p style="font-size: 14px; color: #666;">إذا لم يعمل الزر، انسخ والصق الرابط التالي في متصفحك:</p>
+                  <p style="font-size: 12px; color: #4F46E5; word-break: break-all;">${confirmationUrl}</p>
+                </div>
+                
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                  <h2 style="color: #4F46E5; margin-bottom: 15px;">ما هو تلخيصلي؟</h2>
                   <p>تطبيقنا يساعدك على تلخيص المحاضرات الحية بسرعة وذكاء. مع تلخيصلي ستحصل على:</p>
                   
                   <ul style="line-height: 1.8; margin-top: 15px; padding-right: 20px;">
@@ -164,14 +196,15 @@ export default async function handler(req: Request, res: Response) {
                 </div>
                 
                 <div style="text-align: center; margin-bottom: 30px;">
-                  <p style="font-size: 16px; margin-bottom: 10px;">تابع بريدك الإلكتروني لتصلك آخر التحديثات حول الإطلاق الرسمي</p>
+                  <p style="font-size: 16px; margin-bottom: 10px;">بعد تأكيد بريدك، سنرسل لك آخر التحديثات حول الإطلاق الرسمي</p>
                   <div style="background-color: #4F46E5; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block;">
                     <span>🚀 قريباً!</span>
                   </div>
                 </div>
                 
                 <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
-                  <p style="font-size: 14px; color: #666;">أنت تتلقى هذا البريد لأنك أظهرت اهتمامك بـ تلخيصلي.</p>
+                  <p style="font-size: 14px; color: #666;">أنت تتلقى هذا البريد لأنك سجلت في تلخيصلي.</p>
+                  <p style="font-size: 14px; color: #666;">إذا لم تكن أنت من قام بالتسجيل، يرجى تجاهل هذا البريد.</p>
                   <p style="font-size: 14px; color: #666;">© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
                 </div>
               </div>
@@ -181,10 +214,10 @@ export default async function handler(req: Request, res: Response) {
           if (error) {
             console.error("Resend Email API Error:", error);
           } else {
-            console.log("Welcome email sent successfully via Resend:", data);
+            console.log("Confirmation email sent successfully via Resend:", data);
           }
         } catch (resendError) {
-          console.error("Failed to register contact or send welcome email via Resend:", resendError);
+          console.error("Failed to register contact or send confirmation email via Resend:", resendError);
           // لا تعيد خطأ، فالتسجيل في MailerLite تم بنجاح
         }
       }
@@ -193,7 +226,7 @@ export default async function handler(req: Request, res: Response) {
       return res.status(500).json({ message: "حدث خطأ في الاتصال بخدمة MailerLite" });
     }
 
-    res.json({ success: true, message: "تم التسجيل بنجاح" });
+    res.json({ success: true, message: "تم التسجيل بنجاح. يرجى تأكيد بريدك الإلكتروني." });
   } catch (error) {
     console.error("Server Error:", error);
     res.status(500).json({ message: "حدث خطأ في الخادم" });
