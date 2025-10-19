@@ -161,52 +161,76 @@ export default async function handler(req: any, res: any) {
           const { data, error } = await resend.emails.send({
             from: 'تلخيصلي <noreply@telkhiseli.info>',
             to: [email],
-            subject: 'يرجى تأكيد بريدك الإلكتروني - تلخيصلي',
+            reply_to: 'support@telkhiseli.info',
+            subject: 'تأكيد اشتراكك في تلخيصلي',
             html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333; direction: rtl; text-align: right;">
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <h1 style="color: #4F46E5; margin-bottom: 10px;">شكراً لتسجيلك في تلخيصلي!</h1>
-                  <p style="font-size: 18px; color: #666;">يرجى تأكيد بريدك الإلكتروني لإكمال التسجيل</p>
-                </div>
-                
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                  <h2 style="color: #4F46E5; margin-bottom: 15px;">مرحباً ${name}!</h2>
-                  <p>شكراً لك على اهتمامك بتطبيق تلخيصلي. لتأكيد تسجيلك، يرجى النقر على الزر أدناه:</p>
-                  
-                  <div style="text-align: center; margin: 30px 0;">
-                    <a href="${confirmationUrl}" style="background-color: #4F46E5; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
-                      تأكيد البريد الإلكتروني
-                    </a>
+              <!DOCTYPE html>
+              <html lang="ar" dir="rtl">
+              <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>تأكيد اشتراكك في تلخيصلي</title>
+              </head>
+              <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f5f7fa; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                  <!-- Header -->
+                  <div style="background-color: #4F46E5; padding: 30px 20px; text-align: center;">
+                    <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">تلخيصلي</h1>
+                    <p style="color: #e0e7ff; margin: 10px 0 0; font-size: 16px;">أداة تلخيص المحاضرات الذكية</p>
                   </div>
                   
-                  <p style="font-size: 14px; color: #666;">إذا لم يعمل الزر، انسخ والصق الرابط التالي في متصفحك:</p>
-                  <p style="font-size: 12px; color: #4F46E5; word-break: break-all;">${confirmationUrl}</p>
-                </div>
-                
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
-                  <h2 style="color: #4F46E5; margin-bottom: 15px;">ما هو تلخيصلي؟</h2>
-                  <p>تطبيقنا يساعدك على تلخيص المحاضرات الحية بسرعة وذكاء. مع تلخيصلي ستحصل على:</p>
+                  <!-- Main Content -->
+                  <div style="padding: 40px 30px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                      <h2 style="color: #333; margin-bottom: 15px; font-size: 24px;">شكراً لتسجيلك، ${name.split(' ')[0]}!</h2>
+                      <p style="color: #666; font-size: 16px; line-height: 1.5;">يرجى تأكيد بريدك الإلكتروني لتفعيل اشتراكك والحصول على آخر التحديثات</p>
+                    </div>
+                    
+                    <!-- Confirmation Button -->
+                    <div style="text-align: center; margin: 35px 0;">
+                      <a href="${confirmationUrl}" style="background-color: #4F46E5; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: 600; font-size: 18px; box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);">
+                        تأكيد البريد الإلكتروني
+                      </a>
+                    </div>
+                    
+                    <!-- Alternative Link -->
+                    <div style="text-align: center; margin-bottom: 40px;">
+                      <p style="color: #666; font-size: 14px; margin: 0;">إذا لم يعمل الزر أعلاه، انسخ والصق الرابط التالي في متصفحك:</p>
+                      <p style="color: #4F46E5; font-size: 13px; word-break: break-all; margin: 8px 0 0;">${confirmationUrl}</p>
+                    </div>
+                    
+                    <!-- Features Section -->
+                    <div style="background-color: #f8f9ff; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
+                      <h3 style="color: #4F46E5; margin-top: 0; margin-bottom: 20px; font-size: 20px; text-align: center;">ماذا ستحصل مع تلخيصلي؟h3>
+                      <ul style="padding-right: 20px; margin: 0; line-height: 1.8;">
+                        <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تلخيص المحاضرات الحية في دقائق</li>
+                        <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تنظيم الملاحظات تلقائيًا</li>
+                        <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> تجربة مجانية قبل الاشتراك</li>
+                        <li style="color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> دعوة حصرية للنسخة التجريبية الأولى</li>
+                      </ul>
+                    </div>
+                    
+                    <!-- Security Notice -->
+                    <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin-bottom: 30px;">
+                      <p style="margin: 0; color: #92400e; font-size: 14px;">
+                        <strong>ملاحظة أمان:</strong> هذا الرابط صالح لمدة 24 ساعة فقط. إذا لم تطلب هذا البريد، يرجى تجاهله.
+                      </p>
+                    </div>
+                  </div>
                   
-                  <ul style="line-height: 1.8; margin-top: 15px; padding-right: 20px;">
-                    <li style="margin-bottom: 8px;">✅ تلخيص دروسك وملاحظاتك في دقائق</li>
-                    <li style="margin-bottom: 8px;">✅ تجربة مجانية لتجربة جميع الميزات قبل الاشتراك</li>
-                    <li style="margin-bottom: 8px;">✅ قريبا ستصلك دعوة خاصة لتجربة النسخة المجانية الأولى</li>
-                  </ul>
-                </div>
-                
-                <div style="text-align: center; margin-bottom: 30px;">
-                  <p style="font-size: 16px; margin-bottom: 10px;">بعد تأكيد بريدك، سنرسل لك آخر التحديثات حول الإطلاق الرسمي</p>
-                  <div style="background-color: #4F46E5; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block;">
-                    <span>🚀 قريباً!</span>
+                  <!-- Footer -->
+                  <div style="background-color: #f8f9fa; padding: 25px 30px; text-align: center; border-top: 1px solid #e9ecef;">
+                    <p style="margin: 0 0 10px; color: #6c757d; font-size: 14px;">أنت تتلقى هذا البريد لأنك سجلت في تلخيصلي.</p>
+                    <p style="margin: 0; color: #6c757d; font-size: 14px;">© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
+                    <div style="margin-top: 15px;">
+                      <a href="https://telkhiseli.info" style="color: #4F46E5; text-decoration: none; font-weight: 500;">زيارة موقعنا</a>
+                      <span style="margin: 0 10px; color: #6c757d;">|</span>
+                      <a href="mailto:support@telkhiseli.info" style="color: #4F46E5; text-decoration: none; font-weight: 500;">تواصل معنا</a>
+                    </div>
                   </div>
                 </div>
-                
-                <div style="border-top: 1px solid #eee; padding-top: 20px; text-align: center;">
-                  <p style="font-size: 14px; color: #666;">أنت تتلقى هذا البريد لأنك سجلت في تلخيصلي.</p>
-                  <p style="font-size: 14px; color: #666;">إذا لم تكن أنت من قام بالتسجيل، يرجى تجاهل هذا البريد.</p>
-                  <p style="font-size: 14px; color: #666;">© 2025 تلخيصلي. جميع الحقوق محفوظة.</p>
-                </div>
-              </div>
+              </body>
+              </html>
             `
           });
           
