@@ -44,52 +44,71 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ message: 'انتهت صلاحية رابط التأكيد' });
     }
     
-    // Update subscriber status in MailerLite to confirmed
+    // Update contact status in Resend to confirmed
     try {
-      // First, find the subscriber by email
-      const searchResponse = await fetch(`https://connect.mailerlite.com/api/subscribers?search=${encodeURIComponent(email)}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${process.env.MAILERLITE_API_KEY}`,
-        },
-      });
-      
-      if (!searchResponse.ok) {
-        throw new Error('Failed to search for subscriber');
+      if (!process.env.RESEND_API_KEY) {
+        throw new Error('Resend API key not configured');
       }
       
-      const searchData = await searchResponse.json();
+      const resend = new Resend(process.env.RESEND_API_KEY);
       
-      if (!searchData.data || searchData.data.length === 0) {
-        return res.status(404).json({ message: 'المشترك غير موجود' });
-      }
+      // Update contact status to subscribed (confirmed)
+      const updateOptions: any = {
+        audienceId: process.env.RESEND_AUDIENCE_ID,
+        email: email,
+        unsubscribed: false // Confirm the subscription
+      };
       
-      const subscriber = searchData.data.find((s: any) => s.email === email);
+      const updateResponse = await resend.contacts.update(updateOptions);
       
-      if (!subscriber) {
-        return res.status(404).json({ message: 'المشترك غير موجود' });
-      }
+      console.log("Contact updated in Resend:", updateResponse);
       
-      // Update subscriber status
-      const updateResponse = await fetch(`https://connect.mailerlite.com/api/subscribers/${subscriber.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.MAILERLITE_API_KEY}`,
-        },
-        body: JSON.stringify({
-          email: email,
-          fields: {
-            ...subscriber.fields,
-            email_confirmed: "true",
-            confirmation_date: new Date().toISOString().split('T')[0]
+      // Also update in MailerLite for backup (but don't rely on it)
+      try {
+        const searchResponse = await fetch(`https://connect.mailerlite.com/api/subscribers?search=${encodeURIComponent(email)}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${process.env.MAILERLITE_API_KEY}`,
           },
-          groups: subscriber.groups || [process.env.MAILERLITE_GROUP_ID],
-        }),
-      });
-      
-      if (!updateResponse.ok) {
-        throw new Error('Failed to update subscriber');
+        });
+        
+        if (searchResponse.ok) {
+          const searchData = await searchResponse.json();
+          
+          if (searchData.data && searchData.data.length > 0) {
+            const subscriber = searchData.data.find((s: any) => s.email === email);
+            
+            if (subscriber) {
+              // Update subscriber status in MailerLite
+              const updateMailerLiteResponse = await fetch(`https://connect.mailerlite.com/api/subscribers/${subscriber.id}`, {
+                method: "PUT",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${process.env.MAILERLITE_API_KEY}`,
+                },
+                body: JSON.stringify({
+                  email: email,
+                  fields: {
+                    ...subscriber.fields,
+                    email_confirmed: "true",
+                    confirmation_date: new Date().toISOString().split('T')[0],
+                    confirmed_via: "resend"
+                  },
+                  groups: subscriber.groups || [process.env.MAILERLITE_GROUP_ID],
+                }),
+              });
+              
+              if (updateMailerLiteResponse.ok) {
+                console.log("Contact also updated in MailerLite");
+              } else {
+                console.log("Failed to update contact in MailerLite, but Resend update succeeded");
+              }
+            }
+          }
+        }
+      } catch (mailerLiteError) {
+        console.log("Failed to update MailerLite, but Resend update succeeded:", mailerLiteError);
+        // Don't fail the request if MailerLite update fails
       }
       
       // Send welcome email after confirmation
@@ -97,9 +116,8 @@ export default async function handler(req: any, res: any) {
         try {
           const resend = new Resend(process.env.RESEND_API_KEY);
           
-          // Get subscriber name
-          const subscriberName = subscriber.fields?.name || email.split('@')[0];
-          const firstName = subscriberName.split(' ')[0];
+          // Get subscriber name from email if not available
+          const firstName = email.split('@')[0];
           
           const { data, error } = await resend.emails.send({
             from: 'تلخيصلي <noreply@telkhiseli.info>',
