@@ -436,7 +436,7 @@ export default async function handler(req: any, res: any) {
                 </div>
                 
                 <div style="background-color: #f8f9ff; border-radius: 12px; padding: 25px; margin-bottom: 30px; text-align: right;">
-                  <h3 style="color: #4F46E5; margin-top: 0; margin-bottom: 20px; font-size: 20px; text-align: center;">ماذا بعد ذلك؟h3>
+                  <h3 style="color: #4F46E5; margin-top: 0; margin-bottom: 20px; font-size: 20px; text-align: center;">ماذا بعد ذلك؟</h3>
                   <ul style="padding-right: 20px; margin: 0; line-height: 1.8;">
                     <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> إشعار فوري عند إطلاق النسخة التجريبية</li>
                     <li style="margin-bottom: 12px; color: #444; font-size: 16px;"><span style="color: #4F46E5; font-weight: bold;">✓</span> دعوة حصرية لتجربة جميع الميزات</li>
