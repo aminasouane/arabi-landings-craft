@@ -67,20 +67,69 @@ export default async function handler(req: any, res: any) {
       console.log("Updating contact in Resend:", email);
       console.log("Using audienceId:", process.env.RESEND_AUDIENCE_ID);
       
-      // Update contact status to subscribed (confirmed)
-      const updateOptions: any = {
-        audienceId: process.env.RESEND_AUDIENCE_ID,
-        email: email,
-        unsubscribed: false // Confirm the subscription
-      };
+      // First, get the contact by email to find its ID
+      let contactId = null;
+      try {
+        const getOptions: any = {
+          email: email
+        };
+        
+        // Only add audienceId if it exists
+        if (process.env.RESEND_AUDIENCE_ID) {
+          getOptions.audienceId = process.env.RESEND_AUDIENCE_ID;
+        }
+        
+        const getResponse = await resend.contacts.get(getOptions);
+        
+        console.log("Contact get response:", getResponse);
+        
+        if (getResponse.data && getResponse.data.id) {
+          contactId = getResponse.data.id;
+        }
+      } catch (getError) {
+        console.error("Failed to get contact:", getError);
+      }
       
-      const updateResponse = await resend.contacts.update(updateOptions);
-      
-      console.log("Contact updated in Resend:", updateResponse);
-      
-      if (updateResponse.error) {
-        console.error("Failed to update contact in Resend:", updateResponse.error);
-        throw new Error(`Failed to update contact: ${updateResponse.error.message}`);
+      if (!contactId) {
+        console.log("Contact not found or no ID available, creating new contact...");
+        
+        // Create a new contact
+        const createOptions: any = {
+          email: email,
+          unsubscribed: false // Create as confirmed
+        };
+        
+        // Only add audienceId if it exists
+        if (process.env.RESEND_AUDIENCE_ID) {
+          createOptions.audienceId = process.env.RESEND_AUDIENCE_ID;
+        }
+        
+        const createResponse = await resend.contacts.create(createOptions);
+        
+        console.log("Contact created in Resend:", createResponse);
+        
+        if (createResponse.error) {
+          console.error("Failed to create contact in Resend:", createResponse.error);
+          throw new Error(`Failed to create contact: ${createResponse.error.message}`);
+        }
+      } else {
+        console.log("Found contact ID:", contactId);
+        
+        // Update contact status to subscribed (confirmed) using ID
+        const updateOptions: any = {
+          audienceId: process.env.RESEND_AUDIENCE_ID,
+          id: contactId,
+          unsubscribed: false // Confirm the subscription
+        };
+        
+        const updateResponse = await resend.contacts.update(updateOptions);
+        
+        console.log("Contact updated in Resend:", updateResponse);
+        
+        if (updateResponse.error) {
+          console.error("Failed to update contact in Resend:", updateResponse.error);
+          throw new Error(`Failed to update contact: ${updateResponse.error.message}`);
+        }
       }
       
       // Also update in MailerLite for backup (but don't rely on it)
