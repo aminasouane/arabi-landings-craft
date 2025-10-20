@@ -216,7 +216,7 @@ export default async function handler(req: any, res: any) {
                   <!-- Main Content -->
                   <div style="padding: 40px 30px;">
                     <div style="text-align: center; margin-bottom: 30px;">
-                      <h2 style="color: #333; margin-bottom: 15px; font-size: 24px;">شكراً لتسجيلك، ${name.split(' ')[0]}!</h2>
+                      <h2 style="color: #333; margin-bottom: 15px; font-size: 24px;">شكراً لتسجيلك، !</h2>
                       <p style="color: #666; font-size: 16px; line-height: 1.5;">يرجى تأكيد بريدك الإلكتروني لتفعيل اشتراكك والحصول على آخر التحديثات</p>
                     </div>
                     
