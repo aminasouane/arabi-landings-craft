@@ -25,7 +25,7 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
 
   function calculateTimeLeft() {
-    const launchDate = new Date('2025-10-30T00:00:00');
+    const launchDate = new Date('2025-11-30T00:00:00');
     const now = new Date().getTime();
     const difference = launchDate.getTime() - now;
     
