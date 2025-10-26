@@ -19,37 +19,31 @@ const ComingSoonDialog = ({ open, onOpenChange }: ComingSoonDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  // عدّاد زمني للإطلاق (حتى 30 ديسمبر 2025)
-const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
+  // عدّاد زمني للإطلاق (30 يوم من الآن)
+  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft());
 
-// نحدد تاريخ الإطلاق مرة واحدة (ثابت)
-const launchDate = new Date("2025-12-30T00:00:00");
-
-function calculateTimeLeft() {
-  const now = new Date().getTime();
-  const difference = launchDate.getTime() - now;
-
-  // إذا انتهى العدّاد
-  if (difference <= 0) {
-    return { days: 0, hours: 0, minutes: 0 };
+  function calculateTimeLeft() {
+    const launchDate = new Date();
+    launchDate.setDate(launchDate.getDate() + 30); // 30 يوم من الآن
+    
+    const now = new Date().getTime();
+    const difference = launchDate.getTime() - now;
+    
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    
+    return { days, hours, minutes };
   }
 
-  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-
-  return { days, hours, minutes };
-}
-
-// تحديث العدّاد كل دقيقة
-useEffect(() => {
-  const timer = setInterval(() => {
-    setTimeLeft(calculateTimeLeft());
-  }, 60000);
-
-  return () => clearInterval(timer);
-}, []);
-
+  // تحديث العدّاد كل دقيقة
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 60000);
+    
+    return () => clearInterval(timer);
+  }, []);
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
