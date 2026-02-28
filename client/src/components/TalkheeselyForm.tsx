@@ -92,13 +92,15 @@ const TalkheeselyForm = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2">شكراً لك!</h3>
               <p className="text-muted-foreground mb-6">
-                تم تسجيلك بنجاح. سنتواصل معك خلال 24 ساعة لإرسال رابط النسخة التجريبية.
+                تم تسجيلك بنجاح. يمكنك الآن استخدام التطبيق.
               </p>
-              <div className="bg-primary/10 rounded-2xl p-4">
-                <p className="text-primary font-medium text-sm">
-                  💡 نصيحة: تأكد من فتح البريد الإلكتروني أو واتساب لاستلام الرابط
-                </p>
-              </div>
+              <Button
+                className="w-full py-3 font-semibold text-lg"
+                onClick={() => window.location.href = "https://app.telkhiseli.info/"}
+              >
+                <span>افتح التطبيق الآن</span>
+                <ArrowLeft className="mr-3 h-5 w-5" />
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -112,20 +114,14 @@ const TalkheeselyForm = () => {
         <div className="max-w-lg mx-auto">
           {/* عنوان القسم */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              جرب <span className="text-primary">تلخيصلي</span> مجاناً
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              سجل الآن واحصل على النسخة التجريبية المجانية
-            </p>
           </div>
 
           {/* النموذج */}
           <Card className="shadow-sm">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-xl font-bold text-foreground">تسجيل النسخة التجريبية</CardTitle>
+              <CardTitle className="text-xl font-bold text-foreground">سجل الآن في التطبيق</CardTitle>
               <CardDescription className="text-muted-foreground">
-                املأ البيانات أدناه وسنرسل لك رابط النسخة التجريبية
+                املأ البيانات أدناه للدخول للتطبيق
               </CardDescription>
             </CardHeader>
             
@@ -215,8 +211,9 @@ const TalkheeselyForm = () => {
 
                 {/* زر الإرسال */}
                 <Button 
-                  type="submit" 
+                  type="button" 
                   className="w-full py-3 font-semibold text-lg hover-elevate active-elevate-2"
+                  onClick={() => window.location.href = "https://app.telkhiseli.info/"}
                   data-testid="button-register-trial"
                 >
                   <span>سجل في النسخة التجريبية</span>
@@ -334,13 +331,15 @@ const TalkheeselyFormWithDialog = () => {
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2">شكراً لك!</h3>
               <p className="text-muted-foreground mb-6">
-                تم تسجيلك بنجاح. سنتواصل معك خلال 24 ساعة لإرسال رابط النسخة التجريبية.
+                تم تسجيلك بنجاح. يمكنك الآن استخدام التطبيق.
               </p>
-              <div className="bg-primary/10 rounded-2xl p-4">
-                <p className="text-primary font-medium text-sm">
-                  💡 نصيحة: تأكد من فتح البريد الإلكتروني أو واتساب لاستلام الرابط
-                </p>
-              </div>
+              <Button
+                className="w-full py-3 font-semibold text-lg"
+                onClick={() => window.location.href = "https://app.telkhiseli.info/"}
+              >
+                <span>افتح التطبيق الآن</span>
+                <ArrowLeft className="mr-3 h-5 w-5" />
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -358,20 +357,14 @@ const TalkheeselyFormWithDialog = () => {
         <div className="max-w-lg mx-auto">
           {/* عنوان القسم */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-              جرب <span className="text-primary">تلخيصلي</span> مجاناً
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              سجل الآن واحصل على النسخة التجريبية المجانية
-            </p>
           </div>
 
           {/* النموذج */}
           <Card className="shadow-sm">
             <CardHeader className="text-center pb-4">
-              <CardTitle className="text-xl font-bold text-foreground">تسجيل النسخة التجريبية</CardTitle>
+              <CardTitle className="text-xl font-bold text-foreground">سجل الآن في التطبيق</CardTitle>
               <CardDescription className="text-muted-foreground">
-                املأ البيانات أدناه وسنرسل لك رابط النسخة التجريبية
+                املأ البيانات أدناه للدخول للتطبيق
               </CardDescription>
             </CardHeader>
             
@@ -461,11 +454,12 @@ const TalkheeselyFormWithDialog = () => {
 
                 {/* زر الإرسال */}
                 <Button
-                  type="submit"
+                  type="button"
                   className="w-full py-3 font-semibold text-lg hover-elevate active-elevate-2"
+                  onClick={() => window.location.href = "https://app.telkhiseli.info/"}
                   data-testid="button-register-trial"
                 >
-                  <span>سجل في النسخة التجريبية</span>
+                  <span>ابدأ الآن</span>
                   <ArrowLeft className="mr-3 h-5 w-5" />
                 </Button>
               </form>

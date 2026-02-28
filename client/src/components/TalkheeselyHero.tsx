@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, BookOpen, Sparkles, Clock } from "lucide-react";
-import ComingSoonDialog from "./ComingSoonDialog";
 import ComingSoonVideoDialog from "./ComingSoonVideoDialog";
 
 const TalkheeselyHero = () => {
@@ -74,11 +73,10 @@ const TalkheeselyHero = () => {
               size="lg" 
               className="text-lg px-8 py-4 hover-elevate active-elevate-2"
               onClick={() => {
-                console.log('Trial signup clicked');
-                setIsDialogOpen(true);
+                window.location.href = "https://app.telkhiseli.info/";
               }}
             >
-              <span>جرب النسخة التجريبية مجانًا</span>
+              <span>جرب التطبيق الآن</span>
               <ArrowLeft className="mr-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
             
@@ -129,8 +127,7 @@ const TalkheeselyHero = () => {
                 <Button 
                   className="font-semibold px-6 py-2"
                   onClick={() => {
-                    console.log('Launch app clicked');
-                    setIsDialogOpen(true);
+                    window.location.href = "https://app.telkhiseli.info/";
                   }}
                   data-testid="button-launch"
                 >
@@ -172,12 +169,6 @@ const TalkheeselyHero = () => {
         </div>
       </div>
 
-      {/* Dialog للنسخة التجريبية */}
-      <ComingSoonDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-      />
-      
       {/* Dialog للفيديو التوضيحي */}
       <ComingSoonVideoDialog 
         open={isVideoDialogOpen} 

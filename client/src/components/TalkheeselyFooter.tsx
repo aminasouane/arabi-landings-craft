@@ -1,15 +1,10 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Heart, BookOpen } from "lucide-react";
-import ComingSoonDialog from "./ComingSoonDialog";
 
 const TalkheeselyFooter = () => {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const handleStartClick = () => {
-    console.log('Start now clicked in footer');
-    setIsDialogOpen(true);
+    window.location.href = "https://app.telkhiseli.info/";
   };
 
   return (
@@ -89,12 +84,6 @@ const TalkheeselyFooter = () => {
           </div>
         </div>
       </div>
-
-      {/* نافذة التسجيل */}
-      <ComingSoonDialog 
-        open={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
-      />
     </footer>
   );
 };
